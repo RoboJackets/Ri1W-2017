@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
 import org.lasarobotics.vision.util.ScreenOrientation;
@@ -9,14 +11,14 @@ import org.opencv.core.Size;
 /**
  * Created by zipper on 9/9/17.
  */
-
+@Autonomous
 public class RoboJacketsAuto extends RoboJacketsLinearVisionOpMode {
 
     int frameCount = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        initialize();
+        //initialize();
         waitForVisionStart();
         this.setCamera(Cameras.PRIMARY);
         this.setFrameSize(new Size(900, 900));
