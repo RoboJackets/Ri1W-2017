@@ -5,6 +5,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Created by zipper on 2/4/17.
@@ -230,5 +235,27 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         telemetry.addData("leftBack to position", (leftBack.getTargetPosition() - leftBack.getCurrentPosition()));
         telemetry.addData("rightBack to position", (rightBack.getTargetPosition() - rightBack.getCurrentPosition()));
         telemetry.update();
+    }
+
+    /**
+     * Processes frame for differentiating jewels
+     */
+    public void findJewel(Mat frame) {
+        Mat gray = new Mat();
+        Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.medianBlur(gray, gray, 5);
+        Mat circles = new Mat();
+        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT,
+                1, gray.rows()/16, 100, 30,
+                1, 30);
+        for (int x = 0; x < circles.cols(); x++) {
+            double circleData[] = circles.get(0, x);
+            if (circleData != null) {
+                Point pt = new Point(Math.round(circleData[0]), Math.round(circleData[1]));
+                int radius = (int) Math.round(circleData[2]);
+                Imgproc.circle(frame, pt, radius, new Scalar(0, 255, 0), 5);
+                Imgproc.circle(frame, pt, 3, new Scalar(0, 0, 255), 5);
+            }
+        }
     }
 }
