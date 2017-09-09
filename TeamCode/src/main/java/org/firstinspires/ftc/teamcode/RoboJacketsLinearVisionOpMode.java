@@ -5,6 +5,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Created by zipper on 2/4/17.
@@ -16,20 +20,30 @@ import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     private double NOT_DEPLOYED_POWER = .1;
     private double DEPLOYED_POWER = .9;
-    private double CLAMP_OPEN = .1;
-    private double CLAMP_CLOSED = .9;
+    private double CLAMP_LEFT_OPEN = .1;
+    private double CLAMP_LEFT_CLOSED = .9;
+    private double CLAMP_RIGHT_OPEN = .1;
+    private double CLAMP_RIGHT_CLOSED = .9;
     private double GLYPH_IN = .1;
     private double GLYPH_PUSH = .9;
+    private double RELIC_CLAW_UP = .1;
+    private double RELIC_CLAW_DOWN = .9;
+    private double RELIC_CLAW_OPEN = .1;
+    private double RELIC_CLAW_CLOSED = .9;
 
     private DcMotor leftBack;
     private DcMotor leftFront;
     private DcMotor rightBack;
     private DcMotor rightFront;
-    private DcMotor intake;
+    private DcMotor intakeLeft;
+    private DcMotor intakeRight;
     private DcMotor glyphLift;
-    private Servo deployServo;
-    private Servo clamp;
+    private Servo deploy;
+    private Servo clampLeft;
+    private Servo clampRight;
     private Servo pushGlyph;
+    private Servo relicClawPulley;
+    private Servo relicClaw;
     private ElapsedTime runtime = new ElapsedTime();
 
     /**
@@ -43,15 +57,21 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         leftBack = hardwareMap.dcMotor.get("leftBack");
         rightFront = hardwareMap.dcMotor.get("rightFront");
         rightBack = hardwareMap.dcMotor.get("rightBack");
-        intake = hardwareMap.dcMotor.get("intake");
+        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
+        intakeRight = hardwareMap.dcMotor.get("intakeRight");
         glyphLift = hardwareMap.dcMotor.get("glyphLift");
 
         pushGlyph = hardwareMap.servo.get("pushGlyph");
-        clamp = hardwareMap.servo.get("clampServo");
-        deployServo = hardwareMap.servo.get("deployServo");
+        clampLeft = hardwareMap.servo.get("clampLeft");
+        clampRight = hardwareMap.servo.get("clampRight");
+        deploy = hardwareMap.servo.get("deploy");
+        relicClawPulley = hardwareMap.servo.get("relicClawPulley");
+        relicClaw = hardwareMap.servo.get("relicClaw");
+
         pushGlyph.setPosition(GLYPH_IN);
-        clamp.setPosition(CLAMP_OPEN);
-        deployServo.setPosition(NOT_DEPLOYED_POWER);
+        clampLeft.setPosition(CLAMP_LEFT_OPEN);
+        clampRight.setPosition(CLAMP_RIGHT_OPEN);
+        deploy.setPosition(NOT_DEPLOYED_POWER);
 
 
         rightBack.setDirection(DcMotor.Direction.REVERSE);
@@ -63,29 +83,31 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     /**
      * Deploys mechanisms that go outside of height
      */
-    public void deploy() throws InterruptedException {
-        deployServo.setPosition(DEPLOYED_POWER);
-        sleep(500);
+    public void deploy() {
+        deploy.setPosition(DEPLOYED_POWER);
     }
-    public void glyphPush() throws InterruptedException {
+    public void glyphPush() {
         pushGlyph.setPosition(GLYPH_PUSH);
-        sleep(1000);
+    }
+    public void glyphIn() {
         pushGlyph.setPosition(GLYPH_IN);
-        waitOneFullHardwareCycle();
     }
 
     public void intake(double power) {
-        intake.setPower(power);
+        intakeLeft.setPower(power);
+        intakeRight.setPower(power);
     }
     public void glyphLift(double power) {
         glyphLift.setPower(power);
     }
 
     public void glyphClampClose() {
-        clamp.setPosition(CLAMP_CLOSED);
+        clampLeft.setPosition(CLAMP_LEFT_CLOSED);
+        clampRight.setPosition(CLAMP_RIGHT_CLOSED);
     }
     public void glyphClampOpen() {
-        clamp.setPosition(CLAMP_OPEN);
+        clampLeft.setPosition(CLAMP_LEFT_OPEN);
+        clampRight.setPosition(CLAMP_RIGHT_OPEN);
     }
     public void setPower(double powerLeft, double powerRight) {
         telemetry();
@@ -230,5 +252,27 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         telemetry.addData("leftBack to position", (leftBack.getTargetPosition() - leftBack.getCurrentPosition()));
         telemetry.addData("rightBack to position", (rightBack.getTargetPosition() - rightBack.getCurrentPosition()));
         telemetry.update();
+    }
+
+    /**
+     * Processes frame for differentiating jewels
+     */
+    public void findJewel(Mat frame) {
+        Mat gray = new Mat();
+        Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.medianBlur(gray, gray, 5);
+        Mat circles = new Mat();
+        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT,
+                1, gray.rows()/16, 100, 30,
+                1, 30);
+        for (int x = 0; x < circles.cols(); x++) {
+            double circleData[] = circles.get(0, x);
+            if (circleData != null) {
+                Point pt = new Point(Math.round(circleData[0]), Math.round(circleData[1]));
+                int radius = (int) Math.round(circleData[2]);
+                Imgproc.circle(frame, pt, radius, new Scalar(0, 255, 0), 5);
+                Imgproc.circle(frame, pt, 3, new Scalar(0, 0, 255), 5);
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
     private boolean intakeToggle = false;
     private boolean clampToggle = false;
+    private boolean relicClawToggle = false;
     @Override
     public void runOpMode() throws InterruptedException {
         initialize();
