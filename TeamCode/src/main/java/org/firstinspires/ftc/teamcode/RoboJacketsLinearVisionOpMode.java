@@ -258,7 +258,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     /**
      * Processes frame for differentiating jewels
      */
-    public void findJewel(Mat frame) {
+    public int findJewel(Mat frame) {
         Mat gray = new Mat();
         Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
         Imgproc.medianBlur(gray, gray, 5);
@@ -266,14 +266,13 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT,
                 1, gray.rows()/16, 100, 30,
                 1, 30);
+        int numCircles = 0;
         for (int x = 0; x < circles.cols(); x++) {
             double circleData[] = circles.get(0, x);
             if (circleData != null) {
-                Point pt = new Point(Math.round(circleData[0]), Math.round(circleData[1]));
-                int radius = (int) Math.round(circleData[2]);
-                Imgproc.circle(frame, pt, radius, new Scalar(0, 255, 0), 5);
-                Imgproc.circle(frame, pt, 3, new Scalar(0, 0, 255), 5);
+                numCircles++;
             }
         }
+        return numCircles;
     }
 }

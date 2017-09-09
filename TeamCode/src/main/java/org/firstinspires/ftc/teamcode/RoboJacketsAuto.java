@@ -19,6 +19,7 @@ public class RoboJacketsAuto extends RoboJacketsLinearVisionOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         //initialize();
+
         waitForVisionStart();
         this.setCamera(Cameras.PRIMARY);
         this.setFrameSize(new Size(900, 900));
