@@ -7,9 +7,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Range;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
 
 /**
  * Created by zipper on 2/4/17.
@@ -281,7 +285,27 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         Mat hsvFrame = new Mat();
         Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
-        Mat leftFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(0, hsvFrame.cols()/2));
+        Core.inRange(hsvFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), hsvFrame);
+        Imgproc.GaussianBlur(hsvFrame, hsvFrame, new Size(5,5), 0);
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(hsvFrame, contours, new Mat(), Imgproc.RETR_LIST,Imgproc.CHAIN_APPROX_SIMPLE);
+        if (!contours.isEmpty()) {
+            MatOfPoint largestContour = contours.get(0);
+            for (MatOfPoint contour : contours) {
+                if (Imgproc.contourArea(contour) > Imgproc.contourArea(largestContour)) {
+                    largestContour = contour;
+                }
+            }
+            String orientation = "";
+            if (largestContour.toArray()[0].x < hsvFrame.cols() / 2) {
+                orientation = "left";
+            } else {
+                orientation = "right";
+            }
+            telemetry.addData("Blue jewel is on the ", orientation);
+        }
+
+        /*Mat leftFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(0, hsvFrame.cols()/2));
         Mat leftBlue = new Mat();
         Core.inRange(leftFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), leftBlue);
 
@@ -306,14 +330,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
                 }
             }
         }
-
-        String orientation = "";
-        if (rightCount > leftCount) {
-            orientation = "right";
-        } else {
-            orientation = "left";
-        }
-        telemetry.addData("Blue jewel is on the ", orientation);
+       */
 
     }
 
