@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -281,7 +282,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         Mat hsvFrame = new Mat();
         Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
-        Mat leftFrame = new Mat(hsvFrame, new Rect(0, 0, hsvFrame.cols()/2, hsvFrame.rows()));
+        Mat leftFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(0, hsvFrame.cols()/2));
         Mat leftBlue = new Mat();
         Core.inRange(leftFrame, new Scalar(80, 180, 200), new Scalar(120, 255, 255), leftBlue);
 
@@ -294,7 +295,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
             }
         }
 
-        Mat rightFrame = new Mat(hsvFrame, new Rect(hsvFrame.cols()/2, 0, hsvFrame.cols(), hsvFrame.rows()));
+        Mat rightFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(hsvFrame.cols()/2, hsvFrame.cols()));
         Mat rightBlue = new Mat();
         Core.inRange(rightFrame, new Scalar(80, 180, 200), new Scalar(120, 255, 255), rightBlue);
 
