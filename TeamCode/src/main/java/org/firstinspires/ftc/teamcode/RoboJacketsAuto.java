@@ -22,7 +22,7 @@ public class RoboJacketsAuto extends RoboJacketsLinearVisionOpMode {
 
         this.setCamera(Cameras.PRIMARY);
 
-        this.setFrameSize(new Size(900, 900));
+        this.setFrameSize(new Size(200, 200));
 
         enableExtension(Extensions.ROTATION);       //Automatic screen rotation correction
         enableExtension(Extensions.CAMERA_CONTROL); //Manual camera control
