@@ -1,5 +1,4 @@
-package org.firstinspires.ftc.teamcode;
-
+package org.firstinspires.ftc.robotcontroller.external.samples;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /**
@@ -11,9 +10,10 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
     private boolean relicClawToggle = false;
     private boolean relicPulleyToggle = false;
 
+
     @Override
     public void runOpMode() throws InterruptedException {
-        initialize();
+        initialize(false);
         waitForStart();
         while(opModeIsActive()){
             teleop();
@@ -39,6 +39,7 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
             }
         }
     }
+
     public void teleop() throws InterruptedException {
         //setPower(gamepad1.left_stick_y,gamepad1.right_stick_y);
         //if(intakeToggle) intake(1);
@@ -49,15 +50,15 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
         else pulleyDown();
         if(gamepad1.a) {
             intakeToggle = !intakeToggle;
-            sleep(50);
+            sleep(150);
         }
         if(gamepad1.x) {
             relicClawToggle = !relicClawToggle;
-            sleep(50);
+            sleep(150);
         }
         if(gamepad1.y) {
             relicPulleyToggle = !relicPulleyToggle;
-            sleep(50);
+            sleep(150);
         }
         //telemetry();
     }

@@ -1,14 +1,24 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.robotcontroller.external.samples;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
+import org.lasarobotics.vision.util.ScreenOrientation;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 /**
@@ -28,9 +38,9 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     private double GLYPH_IN = .1;
     private double GLYPH_PUSH = .9;
     private double RELIC_CLAW_UP = .1;
-    private double RELIC_CLAW_DOWN = .9;
+    private double RELIC_CLAW_DOWN = .5;
     private double RELIC_CLAW_OPEN = .9;
-    private double RELIC_CLAW_CLOSED = .7;
+    private double RELIC_CLAW_CLOSED = .4;
 
     private DcMotor leftBack;
     private DcMotor leftFront;
@@ -48,41 +58,70 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     private Servo relicClaw;
     public ElapsedTime runtime = new ElapsedTime();
 
+    private int frameCount = 0;
+
+    private OpenGLMatrix lastLocation = null;
+
+    private VuforiaLocalizer vuforia;
+    private VuforiaTrackable relicTemplate;
+    VuforiaTrackables relicTrackables;
+
+    public boolean blueLeft;
+    public RelicRecoveryVuMark glyphCol = RelicRecoveryVuMark.UNKNOWN;
+
     /**
      * Initializes all necessary components including
      * Motors
      * Sensors
      * Servos
      */
-    public void initialize() {
-//        leftFront = hardwareMap.dcMotor.get("leftFront");
-//        leftBack = hardwareMap.dcMotor.get("leftBack");
-//        rightFront = hardwareMap.dcMotor.get("rightFront");
-//        rightBack = hardwareMap.dcMotor.get("rightBack");
-//        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
-//        intakeRight = hardwareMap.dcMotor.get("intakeRight");
-//        glyphLift = hardwareMap.dcMotor.get("glyphLift");
-//        relicExtend = hardwareMap.dcMotor.get("relicExtend");
-//
-//        pushGlyph = hardwareMap.servo.get("pushGlyph");
-//        clampLeft = hardwareMap.servo.get("clampLeft");
-//        clampRight = hardwareMap.servo.get("clampRight");
-//        deploy = hardwareMap.servo.get("deploy");
+    public void initialize(boolean isAuto) throws InterruptedException {
+        //        leftFront = hardwareMap.dcMotor.get("leftFront");
+        //        leftBack = hardwareMap.dcMotor.get("leftBack");
+        //        rightFront = hardwareMap.dcMotor.get("rightFront");
+        //        rightBack = hardwareMap.dcMotor.get("rightBack");
+        //        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
+        //        intakeRight = hardwareMap.dcMotor.get("intakeRight");
+        //        glyphLift = hardwareMap.dcMotor.get("glyphLift");
+        //        relicExtend = hardwareMap.dcMotor.get("relicExtend");
+        //
+        //        pushGlyph = hardwareMap.servo.get("pushGlyph");
+        //        clampLeft = hardwareMap.servo.get("clampLeft");
+        //        clampRight = hardwareMap.servo.get("clampRight");
+        //        deploy = hardwareMap.servo.get("deploy");
         relicClawPulley = hardwareMap.servo.get("relicClawPulley");
         relicClaw = hardwareMap.servo.get("relicClaw");
 
-//        pushGlyph.setPosition(GLYPH_IN);
-//        clampLeft.setPosition(CLAMP_LEFT_OPEN);
-//        clampRight.setPosition(CLAMP_RIGHT_OPEN);
-//        deploy.setPosition(NOT_DEPLOYED_POWER);
+        //        pushGlyph.setPosition(GLYPH_IN);
+        //        clampLeft.setPosition(CLAMP_LEFT_OPEN);
+        //        clampRight.setPosition(CLAMP_RIGHT_OPEN);
+        //        deploy.setPosition(NOT_DEPLOYED_POWER);
         relicClawPulley.setPosition(RELIC_CLAW_UP);
         relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
 
-//        rightBack.setDirection(DcMotor.Direction.REVERSE);
-//        rightFront.setDirection(DcMotor.Direction.REVERSE);
-//        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+        //        rightBack.setDirection(DcMotor.Direction.REVERSE);
+        //        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        //        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+        if(isAuto) {
+
+            initOpenCV();
+            blueLeft = isBlueLeft();
+            if (openCVCamera != null) {
+                openCVCamera.disableView();
+                openCVCamera.disconnectCamera();
+            }
+
+            if (sensors != null)
+                sensors.stop();
+            openCVCamera = null;
+            for (Extensions extension : Extensions.values())
+                if (isEnabled(extension))
+                    disableExtension(extension); //disable and stop
+            initVuforia();
+        }
         telemetry.addData("Initialization ", "complete");
+        telemetry.addData("blueLeft",blueLeft);
         telemetry.update();
     }
 
@@ -163,6 +202,53 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         rightFront.setPower(power);
         rightBack.setPower(power);
     }
+    public void initVuforia() {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+        parameters.vuforiaLicenseKey = "ASjtsmX/////AAAAGRIKfx5rxUpHh/PGnhhtxFhARxDTGhbXGgYJW2M7DJjZagpGX95lZcr+fiuH/OGcw0aoprFZE0yjWDGZROVrgCnWeURYO9lw6IKCGWZVRJA0AmiVfyFWOUVXLGz5LyXFvhs8iNbAF38DFn/gbuD81RGl126CNWRK+fGiDk/dJTOZspFhZqIsV6heVpjhgb+ZUI771znQlFKR1f9t08viSaiLKXiDsD+zwpiPBh4fHPyM7w8H4wwdPBq0MHDjnfmmxUDEbTMaVeLMoLZWmav70qg9eUzdJ71yH4MnBOsmZ12F0KPQ1txlip0iOVH/0U3mVGqLRrXlhhQeVtefTF2i2kB8YiJqqnGEwsADWm4vSmQ3";
+
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+    }
+    public RelicRecoveryVuMark doVuforia() {
+
+        relicTrackables.activate();
+
+        RelicRecoveryVuMark mark = RelicRecoveryVuMark.UNKNOWN;
+        int leftCount = 0;
+        int centerCount = 0;
+        int rightCount = 0;
+
+        for (int i = 0; i < 20; i++) {
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+                if (vuMark == RelicRecoveryVuMark.LEFT) {
+                    leftCount++;
+                } else if (vuMark == RelicRecoveryVuMark.CENTER) {
+                    centerCount++;
+                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                    rightCount++;
+                }
+            }
+        }
+
+        if (leftCount > centerCount && leftCount > rightCount) {
+            mark = RelicRecoveryVuMark.LEFT;
+        } else if (centerCount > leftCount && centerCount > rightCount) {
+            mark = RelicRecoveryVuMark.CENTER;
+        } else if (rightCount > centerCount && rightCount > leftCount) {
+            mark = RelicRecoveryVuMark.RIGHT;
+        }
+
+        telemetry.addData("Key: ", mark.toString());
+        relicTrackables.deactivate();
+        return mark;
+    }
+
 
     /**
      * Turn right indefinitely
@@ -273,11 +359,63 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         telemetry.addData("rightBack to position", (rightBack.getTargetPosition() - rightBack.getCurrentPosition()));
         telemetry.update();
     }
+    public void initOpenCV() throws InterruptedException {
+        waitForVisionStart();
 
+        this.setCamera(Cameras.PRIMARY);
+
+        this.setFrameSize(new Size(200, 200));
+
+        enableExtension(Extensions.ROTATION);       //Automatic screen rotation correction
+        enableExtension(Extensions.CAMERA_CONTROL); //Manual camera control
+
+
+        rotation.setIsUsingSecondaryCamera(false);
+        rotation.disableAutoRotate();
+        rotation.setActivityOrientationFixed(ScreenOrientation.PORTRAIT);
+
+        cameraControl.setColorTemperature(CameraControlExtension.ColorTemperature.AUTO);
+        cameraControl.setAutoExposureCompensation();
+    }
     /**
      * Processes jewel orientations
      */
-    public boolean isBlueLeft(Mat frame) {
+    public boolean isBlueLeft() throws InterruptedException {
+
+
+        boolean blueLeft = false;
+        int blueLeftCount = 0;
+        int blueRightCount = 0;
+
+        for (int i = 0; i < 20; i++) {
+
+            if (hasNewFrame()) {
+                //Get the frame
+                Mat rgba = getFrameRgba();
+                if (blueLeftHelper(rgba)) {
+                    blueLeftCount++;
+                } else {
+                    blueRightCount++;
+                }
+
+                //Discard the current frame to allow for the next one to render
+                discardFrame();
+
+                //Do all of your custom frame processing here
+                //For this demo, let's just add to a frame counter
+                frameCount++;
+            }
+
+            //Wait for a hardware cycle to allow other processes to run
+            waitOneFullHardwareCycle();
+        }
+
+        if (blueLeftCount > blueRightCount) {
+            blueLeft = true;
+        }
+        return blueLeft;
+    }
+    public boolean blueLeftHelper(Mat frame) {
         Mat hsvFrame = new Mat();
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2BGR);
         Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);

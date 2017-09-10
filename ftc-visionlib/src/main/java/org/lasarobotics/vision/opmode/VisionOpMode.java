@@ -43,7 +43,7 @@ public abstract class VisionOpMode extends VisionOpModeCore {
         this.enableOpenCV = enableOpenCV;
     }
 
-    private boolean isEnabled(Extensions extension) {
+    public boolean isEnabled(Extensions extension) {
         return (extensions & extension.id) > 0;
     }
 
@@ -65,7 +65,7 @@ public abstract class VisionOpMode extends VisionOpModeCore {
      *
      * @param extension Extension ID
      */
-    private void disableExtension(Extensions extension) {
+    public void disableExtension(Extensions extension) {
         extensions -= extensions & extension.id;
 
         extension.instance.stop(this);
