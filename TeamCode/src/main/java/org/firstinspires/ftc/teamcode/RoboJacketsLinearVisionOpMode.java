@@ -277,7 +277,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     /**
      * Processes jewel orientations
      */
-    public void findJewels(Mat frame) {
+    public boolean isBlueLeft(Mat frame) {
         Mat hsvFrame = new Mat();
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2BGR);
         Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
@@ -308,15 +308,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
             }
         }
 
-        String orientation = "";
-        if (leftCount > rightCount) {
-            orientation = "left";
-        } else {
-            orientation = "right";
-        }
-        telemetry.addData("Blue jewel is on the ", orientation);
-        telemetry.addData("leftCount",leftCount);
-        telemetry.addData("rightCount",rightCount);
+        return leftCount > rightCount;
     }
 
 }
