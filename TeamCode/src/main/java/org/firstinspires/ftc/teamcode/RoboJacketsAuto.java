@@ -15,7 +15,8 @@ public class RoboJacketsAuto extends RoboJacketsLinearVisionOpMode {
         //initialize();
 
         while (opModeIsActive()) {
-//           
+//
+
         }
     }
 }

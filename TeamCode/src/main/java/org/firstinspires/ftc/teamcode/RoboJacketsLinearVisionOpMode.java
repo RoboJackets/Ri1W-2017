@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * Created by zipper on 2/4/17.
@@ -70,6 +68,8 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         clampLeft.setPosition(CLAMP_LEFT_OPEN);
         clampRight.setPosition(CLAMP_RIGHT_OPEN);
         deploy.setPosition(NOT_DEPLOYED_POWER);
+        relicClawPulley.setPosition(RELIC_CLAW_UP);
+        relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
 
         rightBack.setDirection(DcMotor.Direction.REVERSE);
@@ -89,6 +89,18 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     }
     public void glyphIn() {
         pushGlyph.setPosition(GLYPH_IN);
+    }
+    public void pulleyDown() {
+        relicClawPulley.setPosition(RELIC_CLAW_DOWN);
+    }
+    public void pulleyUp() {
+        relicClawPulley.setPosition(RELIC_CLAW_UP);
+    }
+    public void relicClawClose() {
+        relicClaw.setPosition(RELIC_CLAW_CLOSED);
+    }
+    public void relicClawOpen() {
+        relicClaw.setPosition(RELIC_CLAW_OPEN);
     }
 
     public void intake(double power) {
@@ -250,26 +262,5 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         telemetry.addData("leftBack to position", (leftBack.getTargetPosition() - leftBack.getCurrentPosition()));
         telemetry.addData("rightBack to position", (rightBack.getTargetPosition() - rightBack.getCurrentPosition()));
         telemetry.update();
-    }
-
-    /**
-     * Processes frame for differentiating jewels
-     */
-    public int findJewel(Mat frame) {
-        Mat gray = new Mat();
-        Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.medianBlur(gray, gray, 5);
-        Mat circles = new Mat();
-        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT,
-                1, gray.rows()/16, 100, 30,
-                1, 30);
-        int numCircles = 0;
-        for (int x = 0; x < circles.cols(); x++) {
-            double circleData[] = circles.get(0, x);
-            if (circleData != null) {
-                numCircles++;
-            }
-        }
-        return numCircles;
     }
 }
