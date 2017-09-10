@@ -68,14 +68,14 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 //        clampLeft = hardwareMap.servo.get("clampLeft");
 //        clampRight = hardwareMap.servo.get("clampRight");
 //        deploy = hardwareMap.servo.get("deploy");
-//        relicClawPulley = hardwareMap.servo.get("relicClawPulley");
+        relicClawPulley = hardwareMap.servo.get("relicClawPulley");
         relicClaw = hardwareMap.servo.get("relicClaw");
 
 //        pushGlyph.setPosition(GLYPH_IN);
 //        clampLeft.setPosition(CLAMP_LEFT_OPEN);
 //        clampRight.setPosition(CLAMP_RIGHT_OPEN);
 //        deploy.setPosition(NOT_DEPLOYED_POWER);
-//        relicClawPulley.setPosition(RELIC_CLAW_UP);
+        relicClawPulley.setPosition(RELIC_CLAW_UP);
         relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
 

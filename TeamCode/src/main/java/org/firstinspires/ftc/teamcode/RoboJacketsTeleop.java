@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
     private boolean intakeToggle = false;
     private boolean relicClawToggle = false;
+    private boolean relicPulleyToggle = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,12 +45,18 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
         //else intake(0);
         if(relicClawToggle) relicClawClose();
         else relicClawOpen();
+        if(relicPulleyToggle) pulleyUp();
+        else pulleyDown();
         if(gamepad1.a) {
             intakeToggle = !intakeToggle;
             sleep(50);
         }
         if(gamepad1.x) {
             relicClawToggle = !relicClawToggle;
+            sleep(50);
+        }
+        if(gamepad1.y) {
+            relicPulleyToggle = !relicPulleyToggle;
             sleep(50);
         }
         //telemetry();
