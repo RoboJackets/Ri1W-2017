@@ -24,8 +24,8 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     private double GLYPH_PUSH = .9;
     private double RELIC_CLAW_UP = .1;
     private double RELIC_CLAW_DOWN = .9;
-    private double RELIC_CLAW_OPEN = .1;
-    private double RELIC_CLAW_CLOSED = .9;
+    private double RELIC_CLAW_OPEN = .9;
+    private double RELIC_CLAW_CLOSED = .7;
 
     private DcMotor leftBack;
     private DcMotor leftFront;
@@ -50,33 +50,33 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
      * Servos
      */
     public void initialize() {
-        leftFront = hardwareMap.dcMotor.get("leftFront");
-        leftBack = hardwareMap.dcMotor.get("leftBack");
-        rightFront = hardwareMap.dcMotor.get("rightFront");
-        rightBack = hardwareMap.dcMotor.get("rightBack");
-        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
-        intakeRight = hardwareMap.dcMotor.get("intakeRight");
-        glyphLift = hardwareMap.dcMotor.get("glyphLift");
-        relicExtend = hardwareMap.dcMotor.get("relicExtend");
-
-        pushGlyph = hardwareMap.servo.get("pushGlyph");
-        clampLeft = hardwareMap.servo.get("clampLeft");
-        clampRight = hardwareMap.servo.get("clampRight");
-        deploy = hardwareMap.servo.get("deploy");
-        relicClawPulley = hardwareMap.servo.get("relicClawPulley");
+//        leftFront = hardwareMap.dcMotor.get("leftFront");
+//        leftBack = hardwareMap.dcMotor.get("leftBack");
+//        rightFront = hardwareMap.dcMotor.get("rightFront");
+//        rightBack = hardwareMap.dcMotor.get("rightBack");
+//        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
+//        intakeRight = hardwareMap.dcMotor.get("intakeRight");
+//        glyphLift = hardwareMap.dcMotor.get("glyphLift");
+//        relicExtend = hardwareMap.dcMotor.get("relicExtend");
+//
+//        pushGlyph = hardwareMap.servo.get("pushGlyph");
+//        clampLeft = hardwareMap.servo.get("clampLeft");
+//        clampRight = hardwareMap.servo.get("clampRight");
+//        deploy = hardwareMap.servo.get("deploy");
+//        relicClawPulley = hardwareMap.servo.get("relicClawPulley");
         relicClaw = hardwareMap.servo.get("relicClaw");
 
-        pushGlyph.setPosition(GLYPH_IN);
-        clampLeft.setPosition(CLAMP_LEFT_OPEN);
-        clampRight.setPosition(CLAMP_RIGHT_OPEN);
-        deploy.setPosition(NOT_DEPLOYED_POWER);
-        relicClawPulley.setPosition(RELIC_CLAW_UP);
+//        pushGlyph.setPosition(GLYPH_IN);
+//        clampLeft.setPosition(CLAMP_LEFT_OPEN);
+//        clampRight.setPosition(CLAMP_RIGHT_OPEN);
+//        deploy.setPosition(NOT_DEPLOYED_POWER);
+//        relicClawPulley.setPosition(RELIC_CLAW_UP);
         relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
 
-        rightBack.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
-        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+//        rightBack.setDirection(DcMotor.Direction.REVERSE);
+//        rightFront.setDirection(DcMotor.Direction.REVERSE);
+//        intakeRight.setDirection(DcMotor.Direction.REVERSE);
         telemetry.addData("Initialization ", "complete");
         telemetry.update();
     }

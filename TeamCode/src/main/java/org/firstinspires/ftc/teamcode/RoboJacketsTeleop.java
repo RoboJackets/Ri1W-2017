@@ -38,14 +38,20 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
             }
         }
     }
-    public void teleop() {
-        setPower(gamepad1.left_stick_y,gamepad1.right_stick_y);
-        if(intakeToggle) intake(1);
-        else intake(0);
+    public void teleop() throws InterruptedException {
+        //setPower(gamepad1.left_stick_y,gamepad1.right_stick_y);
+        //if(intakeToggle) intake(1);
+        //else intake(0);
         if(relicClawToggle) relicClawClose();
         else relicClawOpen();
-        if(gamepad1.a) intakeToggle = !intakeToggle;
-        if(gamepad1.x) relicClawToggle = !relicClawToggle;
-        telemetry();
+        if(gamepad1.a) {
+            intakeToggle = !intakeToggle;
+            sleep(50);
+        }
+        if(gamepad1.x) {
+            relicClawToggle = !relicClawToggle;
+            sleep(50);
+        }
+        //telemetry();
     }
 }
