@@ -41,10 +41,10 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
     }
 
     public void teleop() throws InterruptedException {
-        //setPower(gamepad1.left_stick_y,gamepad1.right_stick_y);
+        setPower(gamepad1.left_stick_y,gamepad1.right_stick_y);
         //if(intakeToggle) intake(1);
         //else intake(0);
-        if(relicClawToggle) relicClawClose();
+        /*if(relicClawToggle) relicClawClose();
         else relicClawOpen();
         if(relicPulleyToggle) pulleyUp();
         else pulleyDown();
@@ -61,5 +61,6 @@ public class RoboJacketsTeleop extends RoboJacketsLinearVisionOpMode {
             sleep(150);
         }
         //telemetry();
+        */
     }
 }

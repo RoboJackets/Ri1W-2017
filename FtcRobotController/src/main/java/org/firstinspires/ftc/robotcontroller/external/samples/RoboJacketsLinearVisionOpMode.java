@@ -76,10 +76,13 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
      * Servos
      */
     public void initialize(boolean isAuto) throws InterruptedException {
-        //        leftFront = hardwareMap.dcMotor.get("leftFront");
-        //        leftBack = hardwareMap.dcMotor.get("leftBack");
-        //        rightFront = hardwareMap.dcMotor.get("rightFront");
-        //        rightBack = hardwareMap.dcMotor.get("rightBack");
+                leftFront = hardwareMap.dcMotor.get("leftFront");
+                leftBack = hardwareMap.dcMotor.get("leftBack");
+                leftFront.setDirection(DcMotor.Direction.REVERSE);
+                rightFront = hardwareMap.dcMotor.get("rightFront");
+                rightBack = hardwareMap.dcMotor.get("rightBack");
+                rightBack.setDirection(DcMotor.Direction.REVERSE);
+
         //        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
         //        intakeRight = hardwareMap.dcMotor.get("intakeRight");
         //        glyphLift = hardwareMap.dcMotor.get("glyphLift");
@@ -119,6 +122,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
                 if (isEnabled(extension))
                     disableExtension(extension); //disable and stop
             initVuforia();
+
         }
         telemetry.addData("Initialization ", "complete");
         telemetry.addData("blueLeft",blueLeft);
@@ -214,7 +218,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
     }
-    public RelicRecoveryVuMark doVuforia() {
+    public RelicRecoveryVuMark doVuforia() throws InterruptedException {
 
         relicTrackables.activate();
 
@@ -222,7 +226,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         int leftCount = 0;
         int centerCount = 0;
         int rightCount = 0;
-
+        sleep(250);
         for (int i = 0; i < 20; i++) {
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
@@ -234,6 +238,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
                     rightCount++;
                 }
             }
+            sleep(50);
         }
 
         if (leftCount > centerCount && leftCount > rightCount) {
@@ -357,6 +362,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         telemetry.addData("rightFront to position", (rightFront.getTargetPosition() - rightFront.getCurrentPosition()));
         telemetry.addData("leftBack to position", (leftBack.getTargetPosition() - leftBack.getCurrentPosition()));
         telemetry.addData("rightBack to position", (rightBack.getTargetPosition() - rightBack.getCurrentPosition()));
+        telemetry.addData("mark",glyphCol);
         telemetry.update();
     }
     public void initOpenCV() throws InterruptedException {
