@@ -34,13 +34,14 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
     private DcMotor glyphLift;
+    private DcMotor relicExtend;
     private Servo deploy;
     private Servo clampLeft;
     private Servo clampRight;
     private Servo pushGlyph;
     private Servo relicClawPulley;
     private Servo relicClaw;
-    private ElapsedTime runtime = new ElapsedTime();
+    public ElapsedTime runtime = new ElapsedTime();
 
     /**
      * Initializes all necessary components including
@@ -56,6 +57,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
         intakeRight = hardwareMap.dcMotor.get("intakeRight");
         glyphLift = hardwareMap.dcMotor.get("glyphLift");
+        relicExtend = hardwareMap.dcMotor.get("relicExtend");
 
         pushGlyph = hardwareMap.servo.get("pushGlyph");
         clampLeft = hardwareMap.servo.get("clampLeft");
@@ -74,6 +76,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 
         rightBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
+        intakeRight.setDirection(DcMotor.Direction.REVERSE);
         telemetry.addData("Initialization ", "complete");
         telemetry.update();
     }
@@ -102,7 +105,9 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     public void relicClawOpen() {
         relicClaw.setPosition(RELIC_CLAW_OPEN);
     }
-
+    public void relicExtend(double power) {
+        relicExtend.setPower(power);
+    }
     public void intake(double power) {
         intakeLeft.setPower(power);
         intakeRight.setPower(power);
