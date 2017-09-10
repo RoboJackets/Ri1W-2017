@@ -8,7 +8,6 @@ import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Range;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -284,7 +283,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 
         Mat leftFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(0, hsvFrame.cols()/2));
         Mat leftBlue = new Mat();
-        Core.inRange(leftFrame, new Scalar(80, 180, 200), new Scalar(120, 255, 255), leftBlue);
+        Core.inRange(leftFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), leftBlue);
 
         int leftCount = 0;
         for (int i = 0; i < leftBlue.rows(); i++) {
@@ -297,7 +296,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 
         Mat rightFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()), new Range(hsvFrame.cols()/2, hsvFrame.cols()));
         Mat rightBlue = new Mat();
-        Core.inRange(rightFrame, new Scalar(80, 180, 200), new Scalar(120, 255, 255), rightBlue);
+        Core.inRange(rightFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), rightBlue);
 
         int rightCount = 0;
         for (int i = 0; i < rightBlue.rows(); i++) {
