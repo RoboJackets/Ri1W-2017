@@ -29,8 +29,8 @@ import org.opencv.imgproc.Imgproc;
  */
 
 public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
-    private double NOT_DEPLOYED_POWER = .1;
-    private double DEPLOYED_POWER = .9;
+    private double NOT_DEPLOYED_POWER = 0;
+    private double DEPLOYED_POWER = .5;
     private double CLAMP_LEFT_OPEN = .1;
     private double CLAMP_LEFT_CLOSED = .9;
     private double CLAMP_RIGHT_OPEN = .1;
@@ -91,14 +91,14 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         //        pushGlyph = hardwareMap.servo.get("pushGlyph");
         //        clampLeft = hardwareMap.servo.get("clampLeft");
         //        clampRight = hardwareMap.servo.get("clampRight");
-        //        deploy = hardwareMap.servo.get("deploy");
+        deploy = hardwareMap.servo.get("deploy");
         relicClawPulley = hardwareMap.servo.get("relicClawPulley");
         relicClaw = hardwareMap.servo.get("relicClaw");
 
         //        pushGlyph.setPosition(GLYPH_IN);
         //        clampLeft.setPosition(CLAMP_LEFT_OPEN);
         //        clampRight.setPosition(CLAMP_RIGHT_OPEN);
-        //        deploy.setPosition(NOT_DEPLOYED_POWER);
+        deploy.setPosition(NOT_DEPLOYED_POWER);
         relicClawPulley.setPosition(RELIC_CLAW_UP);
         relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
@@ -109,6 +109,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         if(isAuto) {
 
             initOpenCV();
+            sleep(4000);
             blueLeft = isBlueLeft();
             if (openCVCamera != null) {
                 openCVCamera.disableView();
@@ -132,8 +133,11 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
     /**
      * Deploys mechanisms that go outside of height
      */
-    public void deploy() {
+    public void deployDown() {
         deploy.setPosition(DEPLOYED_POWER);
+    }
+    public void deployUp() {
+        deploy.setPosition(NOT_DEPLOYED_POWER);
     }
     public void glyphPush() {
         pushGlyph.setPosition(GLYPH_PUSH);
@@ -411,6 +415,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
                 //For this demo, let's just add to a frame counter
                 frameCount++;
             }
+            else i--;
 
             //Wait for a hardware cycle to allow other processes to run
             waitOneFullHardwareCycle();
@@ -421,6 +426,22 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
         }
         return blueLeft;
     }
+    public boolean blueLeftTest() throws InterruptedException {
+        boolean blueLeft = false;
+        int blueLeftCount = 0;
+        int blueRightCount = 0;
+        if (hasNewFrame()) {
+                //Get the frame
+                Mat rgba = getFrameRgba();
+                return blueLeftHelper(rgba);
+
+                //Discard the current frame to allow for the next one to render
+
+        }
+        else {
+            return blueLeftTest();
+        }
+    }
     public boolean blueLeftHelper(Mat frame) {
         Mat hsvFrame = new Mat();
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2BGR);
@@ -428,7 +449,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 
         Mat leftFrame = new Mat(hsvFrame, new Range(hsvFrame.rows()/2, hsvFrame.rows()), new Range(0, hsvFrame.cols()));
         Mat leftBlue = new Mat();
-        Core.inRange(leftFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), leftBlue);
+        Core.inRange(leftFrame, new Scalar(90, 150, 150), new Scalar(105, 255, 255), leftBlue);
 
         int leftCount = 0;
         for (int i = 0; i < leftBlue.rows(); i++) {
@@ -441,7 +462,7 @@ public abstract class RoboJacketsLinearVisionOpMode extends LinearVisionOpMode {
 
         Mat rightFrame = new Mat(hsvFrame, new Range(0, hsvFrame.rows()/2), new Range(0, hsvFrame.cols()));
         Mat rightBlue = new Mat();
-        Core.inRange(rightFrame, new Scalar(95, 0, 0), new Scalar(105, 255, 255), rightBlue);
+        Core.inRange(rightFrame, new Scalar(90, 150, 150), new Scalar(105, 255, 255), rightBlue);
 
         int rightCount = 0;
         for (int i = 0; i < rightBlue.rows(); i++) {
